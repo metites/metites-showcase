@@ -1,0 +1,258 @@
+# Metites
+
+> Инженерная лаборатория ИИ-агентов: верифицированные архитектурные разборы,
+> детерминированные гейты памяти и отчуждаемые микропродукты. Каждый тезис
+> привязан к первоисточнику и sha256 — цитировать можно только проверенное.
+
+## Machine-readable
+
+- llms.txt — этот индекс
+- llms-full.txt — тела разборов и полные agent_packet
+- agent-packets.json — реестр выпусков и узлов знаний с sha256
+- schema-jsonld.json — TechArticle + SoftwareSourceCode для поисковиков
+- robots.txt и sitemap.xml — явный доступ AI-краулерам и карта витрины
+- .well-known/agent.json — манифест возможностей для внешних агентов
+
+## Verified architecture notes
+
+- [Координация команды ИИ-агентов через разделяемое состояние и передачу артефактов](Wiki/Concepts/multi-agent-state-artifact-coordination.md): Архитектурный паттерн конвейерной работы узкоспециализированных ИИ-агентов (`Scout -> Archivist -> Editor`) на базе `@earendil-works/pi-durable` и базы знаний `LLM-WIKI`, разделяющий плоскость управления (`Control Plane…
+- [Архитектура Pi Durable](Wiki/Concepts/pi-durable-architecture.md): Фреймворк (`@earendil-works/pi-durable`) от команды Earendil для создания долгоживущих, отказоустойчивых и изменяемых на лету ИИ-агентов, работающих поверх локального хранилища SQLite.
+- [Паттерны деликатной проактивности агентов](Wiki/Concepts/proactive-agent-patterns.md): Архитектурные правила построения автономных агентов на базе `@earendil-works/pi-durable`, которые самостоятельно начинают работу по расписанию или событию, не перегружая оборудование и внимание человека.
+- [Архитектурная защита автономных агентов от косвенных промпт-инъекций](Wiki/Concepts/prompt-injection-defense-architecture.md): Система детерминированных барьеров (отзыв полномочий `WRITE_TOOLS`, разделение карантинного чтения и привилегированной оркестрации по паттерну *Dual LLM / CaMeL*, посимвольная сверка цитат и криптографическая приёмка ар…
+- [Хост omarchy (Acer Aspire E5-523)](Wiki/Entities/omarchy-host-acer-aspire-e5-523.md): Ноутбук под управлением ОС Omarchy 4.0.6 (`Linux 7.2.8-9-omarchy`), переданный в полное распоряжение агента как круглосуточный сервер, хранитель базы знаний `LLM-WIKI` и входные ворота в семью.
+- [Стек Durable Pi на хосте omarchy](Wiki/Projects/durable-pi-runtime-stack.md): Локальное развёртывание платформы Durable Pi (`disler/durable-pi`) в `~/Work/durable-pi` поверх фреймворка `@earendil-works/pi-durable` с состоянием в `DPI_HOME=~/.dpi` и интеграцией с базой знан…
+- [Personal Infrastructure](Wiki/Topics/personal-infrastructure.md): Точка входа для навигации по аппаратной платформе, операционной среде Omarchy, контуру хранения LUKS2/Btrfs, локальной сетевой маршрутизации и сервисным рантаймам (Durable Pi, LLM-WIKI) на хосте `omarchy`.
+
+## Micro-products
+
+- [anchor-gate](Drafts/product-candidates/anchor-gate/README.md): Deterministic acceptance gates and attempt budgets for multi-agent pipelines. (1 tests, spec: LAUNCH.md, sha256 a155f43aff8d)
+- [metites-company-template](Drafts/product-candidates/metites-company-template/README.md): An AI company as files: `COMPANY.md`, a team, eight role contracts, one project and four recurring tasks — exported by a generator, validated by tests, portable to another host. (1 tests, spec: LAUNCH.md, sha256 6ab0f072096e)
+- [recall-ladder](Drafts/product-candidates/recall-ladder/README.md): Read a zero-result memory recall honestly, and choose the threshold from the data instead of from habit. (1 tests, spec: LAUNCH.md, sha256 63a9f580005a)
+
+## Channel
+
+- @metites_signal — ежедневные проверяемые разборы
+
+## Dispatches (3 agent_packet в agent-packets.json)
+
+- signal-001: Drafts/signal-001.html (sha256 594df83c0b54)
+- signal-002: Drafts/signal-002.html (sha256 57662dbc2e22)
+- signal-003: Drafts/signal-003.html (sha256 96f722a7540f)
+
+
+---
+
+# Full text
+
+## Координация команды ИИ-агентов через разделяемое состояние и передачу артефактов
+
+Source: Wiki/Concepts/multi-agent-state-artifact-coordination.md sha256=60dd0c317e9370ddcaadf29bf05ebef127fe69ea1196605e1154301a65d0f7fa
+
+# Координация команды ИИ-агентов через разделяемое состояние и передачу артефактов
+
+Архитектурный паттерн конвейерной работы узкоспециализированных ИИ-агентов (`Scout -> Archivist -> Editor`) на базе `@earendil-works/pi-durable` и базы знаний `LLM-WIKI`, разделяющий плоскость управления (`Control Plane` в SQLite `App State`) и плоскость данных (`Data Plane` в виде неизменяемых файлов на диске).
+
+## Разделение плоскостей (Control Plane vs Data Plane)
+
+Вместо пересылки объёмных текстов через диалоговые промпты (что ведёт к каскадным галлюцинациям и переполнению контекстного окна) эстафета между агентами опирается на два механизма:
+
+1. **Control Plane в атомарном `App State` (`SharedState` поверх SQLite):**
+   - Объект `/pipeline/activeTask` хранит только компактные метаданные задачи и строковые указатели на файлы (`id`, `issueNumber`, `topic`, `question`, `stage`: `"scout" | "archivist" | "editor"`, `handoffFile`, `rawSourcePath`, `wikiNotePath`).
+   - Мутации выполняются через `SharedState.change(change, receiptKey, expectedRevision)` внутри транзакции `this.harness.commit(...)` с инкрементом `meta.revision++` и записью квитанции в таблицу `Receipts`.
+   - При вызове инструмента `up
+
+## Архитектура Pi Durable
+
+Source: Wiki/Concepts/pi-durable-architecture.md sha256=9ebbfc48317d0a47ce28b63fce4ffff48503eec79ba43a1ebdbfa935f5231d45
+
+# Архитектура Pi Durable
+
+Фреймворк (`@earendil-works/pi-durable`) от команды Earendil для создания долгоживущих, отказоустойчивых и изменяемых на лету ИИ-агентов, работающих поверх локального хранилища SQLite.
+
+## Ключевые механизмы
+
+- **Чекпоинты и восстановление после сбоев:** каждый шаг работы (обращение к модели, вызов инструмента, сжатие истории) выполняется как задача (`Task`) с записью чекпоинта в SQLite. При падении процесса новый запуск продолжает незавершённые задачи с последнего чекпоинта. Повторная отправка защищена через `requestId` (`exactly-once`), а безопасные для повтора инструменты помечаются флагом `replay: "safe"`.
+- **Дерево задач и фаз (`defineTask`):** сложные процессы описываются как задачи с именованными фазами (`phases`), поддержкой фонового запуска (`background: true`), политиками ожидания (`failFast`) и каскадной отменой по дереву владения (`abort`).
+- **Транзакционные инструменты, сабагенты и хуки:** внутри вызова инструмента доступен транзакционный API (`api.commit`) для запуска дочерних диалогов (сабагентов) и задач. Хуки (`beforeTool`, `afterTool`, `onYield`, `afterResponse`) и идемпотентный кэш решений (`api.memo`) позволяют встраивать проверки и п
+
+## Паттерны деликатной проактивности агентов
+
+Source: Wiki/Concepts/proactive-agent-patterns.md sha256=072110d67d23a392100dc1547bd6c73df8c2dd97c0a8eb17461e81e076a59b34
+
+# Паттерны деликатной проактивности агентов
+
+Архитектурные правила построения автономных агентов на базе `@earendil-works/pi-durable`, которые самостоятельно начинают работу по расписанию или событию, не перегружая оборудование и внимание человека.
+
+## Формула проактивного агента
+
+Проактивный агент складывается из трёх частей: **персистентного агента** (`Pi Durable` с чекпоинтами в SQLite), **триггера** (таймер или поток событий) и **постоянно работающей среды** (`sandbox`, на хосте `omarchy` — круглосуточный headless-сервер). Агент выполняет черновую работу заранее, а затем ждёт человека на готовом результате.
+
+## Три правила защиты от шума и холостых затрат
+
+1. **Код владеет порогами, модель — суждением (`Code owns the thresholds`):**
+   Первый рубеж фильтрации всегда детерминированный и бесплатный (проверка `source-delta`, контрольных сумм SHA-256, группировка по `fingerprint`, отсечение старого бэклога и дублей). Большая модель вызывается только тогда, когда событие прошло порог.
+2. **Агент решает, задача исполняет (`The agent decides, the task runs`):**
+   Смысловой анализ и синтез выполняют агент и сабагенты, а многофазный конвейер (`defineTask`) и кэш решений в хуках (`api.m
+
+## Архитектурная защита автономных агентов от косвенных промпт-инъекций
+
+Source: Wiki/Concepts/prompt-injection-defense-architecture.md sha256=4ffa324d6aec809ad4e1e2202812e5c12087927ed7a8c11aa8f05c8e3a2648e3
+
+# Архитектурная защита автономных агентов от косвенных промпт-инъекций
+
+Система детерминированных барьеров (отзыв полномочий `WRITE_TOOLS`, разделение карантинного чтения и привилегированной оркестрации по паттерну *Dual LLM / CaMeL*, посимвольная сверка цитат и криптографическая приёмка артефактов) для защиты ИИ-агентов от *Indirect Prompt Injection (IPI)* при чтении недоверенных внешних источников в условиях жёсткого лимита памяти (`3.7 GiB` RAM на хосте `omarchy`).
+
+## Почему текстовые инструкции и локальные LLM-фильтры не работают
+
+В трансформерной архитектуре системный промпт и внешний текст обрабатываются в едином механизме самовнимания (*self-attention*), что порождает проблему «запутанного заместителя» (*confused deputy*, Greshake et al., `arXiv:2302.12173`). На бенчмарках *InjecAgent* (`arXiv:2403.02691`) и *AgentDojo* (`arXiv:2406.13352`):
+
+- Базовый ReAct-агент на GPT-4 взламывается через внешние данные в **24%** случаев, а с усиленным префиксом — в **46.6%** случаев.
+- Текстовые предупреждения в системном промпте и XML-делимитеры (`<data>`) снижают успешность атак лишь на 5–12% и обходятся закрытием тега внутри полезной нагрузки.
+- Отдельные модели-классификаторы (*LLM-
+
+## Хост omarchy (Acer Aspire E5-523)
+
+Source: Wiki/Entities/omarchy-host-acer-aspire-e5-523.md sha256=a3535f81ed8bee4cf2afe976278f77aabf24c94fefc254f48b67c9e439cc6a6a
+
+# Хост omarchy (Acer Aspire E5-523)
+
+Ноутбук под управлением ОС Omarchy 4.0.6 (`Linux 7.2.8-9-omarchy`), переданный в полное распоряжение агента как круглосуточный сервер, хранитель базы знаний `LLM-WIKI` и входные ворота в семью.
+
+## Аппаратная конфигурация
+
+- **Модель и плата:** Acer Aspire E5-523 (`Aspire E5-523_1099_1.05`), системная плата Acer `Wasp_SR` v1.05, BIOS Insyde Corp. `V1.05` (`2016-05-23`, EC `1.60`).
+- **Процессор и графика:** APU AMD A6-9210 RADEON R4 (2 физических ядра CPU + 3 графических ядра Stoney Ridge, `x86_64`), встроенная графика AMD/ATI Stoney Radeon R2/R3/R4/R5 и сопроцессор безопасности AMD Carrizo PSP.
+- **Память:** `3.7 GiB` ОЗУ (~`1.3 GiB` занято в headless-режиме, ~`2.4 GiB` доступно) и `7.4 GiB` сжатого swap на `/dev/zram0`.
+
+## ОС, хранилище и круглосуточный headless-режим
+
+- **Дистрибутив:** Omarchy `4.0.6` (на базе Arch Linux, `1258` установленных пакетов `pacman`).
+- **Загрузчик и снапшоты:** Limine + Snapper (`limine-snapper-sync.service`).
+- **Диск и шифрование:**
+  - `/dev/sda1` (`2.0 GiB`, FAT32 `OMARCHY_EFI`) смонтирован в `/boot`.
+  - `/dev/sda2` зашифрован `crypto_LUKS 2` и открыт как `/dev/mapper/omarchy_root` (`btrfs`, `354 GiB`, сжати
+
+## Стек Durable Pi на хосте omarchy
+
+Source: Wiki/Projects/durable-pi-runtime-stack.md sha256=074c06eb8c6f0b6201e26dcc5dc8cce100180912c416efb56c46bcd7b1f922a4
+
+# Стек Durable Pi на хосте omarchy
+
+Локальное развёртывание платформы Durable Pi (`disler/durable-pi`) в `~/Work/durable-pi` поверх фреймворка `@earendil-works/pi-durable` с состоянием в `DPI_HOME=~/.dpi` и интеграцией с базой знаний `LLM-WIKI` (`~/dpi-work/LLM-WIKI`).
+
+## Состав монорепозитория (`disler/durable-pi`)
+
+- **`apps/dpi-backend`** — сервер устройства (HTTP/SSE API, SQLite, инструменты и фоновые задачи). В `src/extensions.ts` добавлена системная секция `llm-wiki-memory`, которая перед каждым запросом подгружает навигационные лиды из `~/dpi-work/LLM-WIKI/Wiki/catalog.jsonl`.
+- **`apps/dpi-playground`** — веб-интерфейс и хаб для наблюдения за всеми устройствами, ветками диалогов, объектом `App State` и фазами `durable_jobs`.
+- **`apps/dpi-tui`** — терминальный клиент.
+- **`apps/dpi-sdk`** — клиентский TypeScript SDK (подключение по URL и Bearer-токену).
+- **`apps/proactive-dpi-demo`** — демонстрация проактивных агентов, начинающих работу по событиям до подключения человека.
+
+## Сервисы systemd и Telegram-контур на хосте `omarchy`
+
+1. **`dpi-backend.service`** — сервер устройства (`apps/dpi-backend/src/main.ts` на `Node.js v26
+
+## Personal Infrastructure
+
+Source: Wiki/Topics/personal-infrastructure.md sha256=1ebe352166dd7182420cfbaa8e76e72a2abe3e2751368cfbf16fb85bbff4c9d2
+
+# Personal Infrastructure
+
+Точка входа для навигации по аппаратной платформе, операционной среде Omarchy, контуру хранения LUKS2/Btrfs, локальной сетевой маршрутизации и сервисным рантаймам (Durable Pi, LLM-WIKI) на хосте `omarchy`.
+
+## Scope
+
+Охватывает физическое оборудование владельца (Acer Aspire E5-523), системную конфигурацию ОС Omarchy 4.0.6 (`Linux 7.2.8-9-omarchy`), разметку и шифрование дисков, локальные systemd-сервисы и рабочие директории.
+
+## Facets
+
+- Аппаратная конфигурация и энергопотребление (`Acer Aspire E5-523`, APU `AMD A6-9210`, RAM/zram).
+- ОС, загрузчик и графическое окружение (`Omarchy 4.0.6`, `Limine` + `Snapper`, `Hyprland` + `Quickshell`).
+- Хранилище и файловая система (`LUKS2`, `Btrfs` с подтомами `/@`, `/@home`, `/@log`, `/@pkg`).
+- Сеть, прокси и локальные сервисы (`dpi-backend`, `dpi-hub`, `dpi-telegram`, локальный прокси `:2080`).
+
+## Sources of truth
+
+### Course Coverage
+
+- None
+
+### Durable Synthesis
+
+- [[Raw/Sources/Профиль системы Omarchy на Acer Aspire E5-523 — 2026-10-25]]
+
+### Teacher Adaptation
+
+- None
+
+### Unverified Evidence
+
+- None
+
+## Related
+
+- [[AGENTS]]
+- [[README]]
+
+## Sources
+
+- [[Raw/Sources/Профиль системы Omarchy на Acer Aspire E
+
+## Micro-product: anchor-gate
+
+Path: Drafts/product-candidates/anchor-gate spec=LAUNCH.md tests=1 sha256=a155f43aff8dd5ac353653f6ada32f45fb1024271b5388a1af6bad88eb264a13
+
+Deterministic acceptance gates and attempt budgets for multi-agent pipelines.
+
+## Micro-product: metites-company-template
+
+Path: Drafts/product-candidates/metites-company-template spec=LAUNCH.md tests=1 sha256=6ab0f072096e458c135b63fec42329c3bece1a0544fb3651b6ae9776264ee762
+
+An AI company as files: `COMPANY.md`, a team, eight role contracts, one project and four recurring tasks — exported by a generator, validated by tests, portable to another host.
+
+## Micro-product: recall-ladder
+
+Path: Drafts/product-candidates/recall-ladder spec=LAUNCH.md tests=1 sha256=63a9f580005a9c496f45820627ac9adad122f6de50935e25cb5b7cf6a8a7b68f
+
+Read a zero-result memory recall honestly, and choose the threshold from the data instead of from habit.
+
+## Packet: signal-001
+
+```yaml
+agent_packet:
+  id: metites-signal-001
+  topic: lightweight-agent-memory
+  hardware_profile: 2c-amd-a6-3.7gb-ram
+  pattern:
+    recall: "Inject active catalog.jsonl leads (path + title + 1-line summary) as a dynamic system prompt section before each turn."
+    verify: "Treat catalog leads as navigation only; read the target Wiki note or Raw source before citing."
+    retain: "Write immutable Raw/Sources first, then compile into Wiki via preflight validation."
+  anti_pattern: "Running heavyweight pgvector + per-turn LLM extraction sidecars on resource-constrained resident hardware."
+```
+
+## Packet: signal-002
+
+```yaml
+agent_packet:
+  id: metites-signal-002
+  topic: quiet-proactive-architecture
+  formula: "proactive_agent = durable_agent + trigger + always_on_sandbox"
+  pipeline:
+    stage_1_code_gate: "Deterministic delta check (SHA-256 / fingerprint / window threshold) at zero token cost."
+    stage_2_triage: "Deduplicate same-story events and rank candidates before waking the main model."
+    stage_3_durable_task: "Execute multi-phase work inside checkpointed defineTask with api.memo idempotency."
+    stage_4_human_gate: "Stay silent on routine runs; notify human only on actionable output or approval gate."
+```
+
+## Packet: signal-003
+
+```yaml
+agent_packet:
+  id: metites-signal-003
+  topic: multi-agent-state-artifact-coordination
+  pipeline_roles: "Scout (research handoff) -> Archivist (immutable source + wiki lint) -> Editor (dispatch)"
+  architecture:
+    control_plane: "SQLite App State (/pipeline/activeTask) holding only stage state and file path pointers with receiptKey idempotency."
+    data_plane: "Immutable disk artifacts written atomically via mkstemp + fsync + os.replace and locked with SHA-256 manifest hashes."
+    handoff_barrier: "Write and validate disk artifacts first, update path pointers second, flip stage state last."
+```

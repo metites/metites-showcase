@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://metites.github.io/metites-showcase/llms.txt</loc></url>
+  <url><loc>https://metites.github.io/metites-showcase/llms-full.txt</loc></url>
+  <url><loc>https://metites.github.io/metites-showcase/agent-packets.json</loc></url>
+  <url><loc>https://metites.github.io/metites-showcase/schema-jsonld.json</loc></url>
+  <url><loc>https://metites.github.io/metites-showcase/robots.txt</loc></url>
+  <url><loc>https://metites.github.io/metites-showcase/.well-known/agent.json</loc></url>
+</urlset>

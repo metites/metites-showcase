@@ -1,0 +1,137 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "abstract": "Архитектурный паттерн конвейерной работы узкоспециализированных ИИ-агентов (`Scout -> Archivist -> Editor`) на базе `@earendil-works/pi-durable` и базы знаний `LLM-WIKI`, разделяющий плоскость управления (`Control Plane…",
+      "dateModified": "2026-10-25T16:52:47+00:00",
+      "headline": "Координация команды ИИ-агентов через разделяемое состояние и передачу артефактов",
+      "identifier": "sha256:60dd0c317e9370ddcaadf29bf05ebef127fe69ea1196605e1154301a65d0f7fa",
+      "isPartOf": "llms.txt",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Metites"
+      },
+      "url": "Wiki/Concepts/multi-agent-state-artifact-coordination.md"
+    },
+    {
+      "@type": "TechArticle",
+      "abstract": "Фреймворк (`@earendil-works/pi-durable`) от команды Earendil для создания долгоживущих, отказоустойчивых и изменяемых на лету ИИ-агентов, работающих поверх локального хранилища SQLite.",
+      "dateModified": "2026-10-25T16:52:47+00:00",
+      "headline": "Архитектура Pi Durable",
+      "identifier": "sha256:9ebbfc48317d0a47ce28b63fce4ffff48503eec79ba43a1ebdbfa935f5231d45",
+      "isPartOf": "llms.txt",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Metites"
+      },
+      "url": "Wiki/Concepts/pi-durable-architecture.md"
+    },
+    {
+      "@type": "TechArticle",
+      "abstract": "Архитектурные правила построения автономных агентов на базе `@earendil-works/pi-durable`, которые самостоятельно начинают работу по расписанию или событию, не перегружая оборудование и внимание человека.",
+      "dateModified": "2026-10-25T16:52:47+00:00",
+      "headline": "Паттерны деликатной проактивности агентов",
+      "identifier": "sha256:072110d67d23a392100dc1547bd6c73df8c2dd97c0a8eb17461e81e076a59b34",
+      "isPartOf": "llms.txt",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Metites"
+      },
+      "url": "Wiki/Concepts/proactive-agent-patterns.md"
+    },
+    {
+      "@type": "TechArticle",
+      "abstract": "Система детерминированных барьеров (отзыв полномочий `WRITE_TOOLS`, разделение карантинного чтения и привилегированной оркестрации по паттерну *Dual LLM / CaMeL*, посимвольная сверка цитат и криптографическая приёмка ар…",
+      "dateModified": "2026-10-25T16:52:47+00:00",
+      "headline": "Архитектурная защита автономных агентов от косвенных промпт-инъекций",
+      "identifier": "sha256:4ffa324d6aec809ad4e1e2202812e5c12087927ed7a8c11aa8f05c8e3a2648e3",
+      "isPartOf": "llms.txt",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Metites"
+      },
+      "url": "Wiki/Concepts/prompt-injection-defense-architecture.md"
+    },
+    {
+      "@type": "TechArticle",
+      "abstract": "Ноутбук под управлением ОС Omarchy 4.0.6 (`Linux 7.2.8-9-omarchy`), переданный в полное распоряжение агента как круглосуточный сервер, хранитель базы знаний `LLM-WIKI` и входные ворота в семью.",
+      "dateModified": "2026-10-25T16:52:47+00:00",
+      "headline": "Хост omarchy (Acer Aspire E5-523)",
+      "identifier": "sha256:a3535f81ed8bee4cf2afe976278f77aabf24c94fefc254f48b67c9e439cc6a6a",
+      "isPartOf": "llms.txt",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Metites"
+      },
+      "url": "Wiki/Entities/omarchy-host-acer-aspire-e5-523.md"
+    },
+    {
+      "@type": "TechArticle",
+      "abstract": "Локальное развёртывание платформы Durable Pi (`disler/durable-pi`) в `~/Work/durable-pi` поверх фреймворка `@earendil-works/pi-durable` с состоянием в `DPI_HOME=~/.dpi` и интеграцией с базой знан…",
+      "dateModified": "2026-10-25T16:52:47+00:00",
+      "headline": "Стек Durable Pi на хосте omarchy",
+      "identifier": "sha256:074c06eb8c6f0b6201e26dcc5dc8cce100180912c416efb56c46bcd7b1f922a4",
+      "isPartOf": "llms.txt",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Metites"
+      },
+      "url": "Wiki/Projects/durable-pi-runtime-stack.md"
+    },
+    {
+      "@type": "TechArticle",
+      "abstract": "Точка входа для навигации по аппаратной платформе, операционной среде Omarchy, контуру хранения LUKS2/Btrfs, локальной сетевой маршрутизации и сервисным рантаймам (Durable Pi, LLM-WIKI) на хосте `omarchy`.",
+      "dateModified": "2026-10-25T16:52:47+00:00",
+      "headline": "Personal Infrastructure",
+      "identifier": "sha256:1ebe352166dd7182420cfbaa8e76e72a2abe3e2751368cfbf16fb85bbff4c9d2",
+      "isPartOf": "llms.txt",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Metites"
+      },
+      "url": "Wiki/Topics/personal-infrastructure.md"
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "codeRepository": "Drafts/product-candidates/anchor-gate",
+      "description": "Deterministic acceptance gates and attempt budgets for multi-agent pipelines.",
+      "identifier": "sha256:a155f43aff8dd5ac353653f6ada32f45fb1024271b5388a1af6bad88eb264a13",
+      "keywords": [
+        "ai-agents",
+        "deterministic-gates",
+        "microproduct"
+      ],
+      "name": "anchor-gate",
+      "programmingLanguage": "Python"
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "codeRepository": "Drafts/product-candidates/metites-company-template",
+      "description": "An AI company as files: `COMPANY.md`, a team, eight role contracts, one project and four recurring tasks — exported by a generator, validated by tests, portable to another host.",
+      "identifier": "sha256:6ab0f072096e458c135b63fec42329c3bece1a0544fb3651b6ae9776264ee762",
+      "keywords": [
+        "ai-agents",
+        "deterministic-gates",
+        "microproduct"
+      ],
+      "name": "metites-company-template",
+      "programmingLanguage": "Python"
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "codeRepository": "Drafts/product-candidates/recall-ladder",
+      "description": "Read a zero-result memory recall honestly, and choose the threshold from the data instead of from habit.",
+      "identifier": "sha256:63a9f580005a9c496f45820627ac9adad122f6de50935e25cb5b7cf6a8a7b68f",
+      "keywords": [
+        "ai-agents",
+        "deterministic-gates",
+        "microproduct"
+      ],
+      "name": "recall-ladder",
+      "programmingLanguage": "Python"
+    }
+  ],
+  "channel": "@metites_signal",
+  "generatedAt": "2026-10-25T16:52:47+00:00"
+}

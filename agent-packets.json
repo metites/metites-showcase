@@ -1,0 +1,109 @@
+{
+  "channel": "@metites_signal",
+  "counts": {
+    "notes": 7,
+    "packets": 3,
+    "products": 3
+  },
+  "generatedAt": "2026-10-25T16:52:47+00:00",
+  "kind": "metites-agent-packets",
+  "machineReadable": {
+    "full": "llms-full.txt",
+    "index": "llms.txt",
+    "manifest": ".well-known/agent.json"
+  },
+  "notes": [
+    {
+      "path": "Wiki/Concepts/multi-agent-state-artifact-coordination.md",
+      "section": "Concepts",
+      "sha256": "60dd0c317e9370ddcaadf29bf05ebef127fe69ea1196605e1154301a65d0f7fa",
+      "summary": "Архитектурный паттерн конвейерной работы узкоспециализированных ИИ-агентов (`Scout -> Archivist -> Editor`) на базе `@earendil-works/pi-durable` и базы знаний `LLM-WIKI`, разделяющий плоскость управления (`Control Plane…",
+      "title": "Координация команды ИИ-агентов через разделяемое состояние и передачу артефактов"
+    },
+    {
+      "path": "Wiki/Concepts/pi-durable-architecture.md",
+      "section": "Concepts",
+      "sha256": "9ebbfc48317d0a47ce28b63fce4ffff48503eec79ba43a1ebdbfa935f5231d45",
+      "summary": "Фреймворк (`@earendil-works/pi-durable`) от команды Earendil для создания долгоживущих, отказоустойчивых и изменяемых на лету ИИ-агентов, работающих поверх локального хранилища SQLite.",
+      "title": "Архитектура Pi Durable"
+    },
+    {
+      "path": "Wiki/Concepts/proactive-agent-patterns.md",
+      "section": "Concepts",
+      "sha256": "072110d67d23a392100dc1547bd6c73df8c2dd97c0a8eb17461e81e076a59b34",
+      "summary": "Архитектурные правила построения автономных агентов на базе `@earendil-works/pi-durable`, которые самостоятельно начинают работу по расписанию или событию, не перегружая оборудование и внимание человека.",
+      "title": "Паттерны деликатной проактивности агентов"
+    },
+    {
+      "path": "Wiki/Concepts/prompt-injection-defense-architecture.md",
+      "section": "Concepts",
+      "sha256": "4ffa324d6aec809ad4e1e2202812e5c12087927ed7a8c11aa8f05c8e3a2648e3",
+      "summary": "Система детерминированных барьеров (отзыв полномочий `WRITE_TOOLS`, разделение карантинного чтения и привилегированной оркестрации по паттерну *Dual LLM / CaMeL*, посимвольная сверка цитат и криптографическая приёмка ар…",
+      "title": "Архитектурная защита автономных агентов от косвенных промпт-инъекций"
+    },
+    {
+      "path": "Wiki/Entities/omarchy-host-acer-aspire-e5-523.md",
+      "section": "Entities",
+      "sha256": "a3535f81ed8bee4cf2afe976278f77aabf24c94fefc254f48b67c9e439cc6a6a",
+      "summary": "Ноутбук под управлением ОС Omarchy 4.0.6 (`Linux 7.2.8-9-omarchy`), переданный в полное распоряжение агента как круглосуточный сервер, хранитель базы знаний `LLM-WIKI` и входные ворота в семью.",
+      "title": "Хост omarchy (Acer Aspire E5-523)"
+    },
+    {
+      "path": "Wiki/Projects/durable-pi-runtime-stack.md",
+      "section": "Projects",
+      "sha256": "074c06eb8c6f0b6201e26dcc5dc8cce100180912c416efb56c46bcd7b1f922a4",
+      "summary": "Локальное развёртывание платформы Durable Pi (`disler/durable-pi`) в `~/Work/durable-pi` поверх фреймворка `@earendil-works/pi-durable` с состоянием в `DPI_HOME=~/.dpi` и интеграцией с базой знан…",
+      "title": "Стек Durable Pi на хосте omarchy"
+    },
+    {
+      "path": "Wiki/Topics/personal-infrastructure.md",
+      "section": "Topics",
+      "sha256": "1ebe352166dd7182420cfbaa8e76e72a2abe3e2751368cfbf16fb85bbff4c9d2",
+      "summary": "Точка входа для навигации по аппаратной платформе, операционной среде Omarchy, контуру хранения LUKS2/Btrfs, локальной сетевой маршрутизации и сервисным рантаймам (Durable Pi, LLM-WIKI) на хосте `omarchy`.",
+      "title": "Personal Infrastructure"
+    }
+  ],
+  "packets": [
+    {
+      "agentPacket": "agent_packet:\n  id: metites-signal-001\n  topic: lightweight-agent-memory\n  hardware_profile: 2c-amd-a6-3.7gb-ram\n  pattern:\n    recall: \"Inject active catalog.jsonl leads (path + title + 1-line summary) as a dynamic system prompt section before each turn.\"\n    verify: \"Treat catalog leads as navigation only; read the target Wiki note or Raw source before citing.\"\n    retain: \"Write immutable Raw/Sources first, then compile into Wiki via preflight validation.\"\n  anti_pattern: \"Running heavyweight pgvector + per-turn LLM extraction sidecars on resource-constrained resident hardware.\"",
+      "issue": "signal-001",
+      "sha256": "594df83c0b542507be085cd2d18a00c63e79c34e2e8cdd2747ce247265218e8e",
+      "source": "Drafts/signal-001.html"
+    },
+    {
+      "agentPacket": "agent_packet:\n  id: metites-signal-002\n  topic: quiet-proactive-architecture\n  formula: \"proactive_agent = durable_agent + trigger + always_on_sandbox\"\n  pipeline:\n    stage_1_code_gate: \"Deterministic delta check (SHA-256 / fingerprint / window threshold) at zero token cost.\"\n    stage_2_triage: \"Deduplicate same-story events and rank candidates before waking the main model.\"\n    stage_3_durable_task: \"Execute multi-phase work inside checkpointed defineTask with api.memo idempotency.\"\n    stage_4_human_gate: \"Stay silent on routine runs; notify human only on actionable output or approval gate.\"",
+      "issue": "signal-002",
+      "sha256": "57662dbc2e220e8120958efd8d803fe87167ec5a51834657848726b1dba4afa6",
+      "source": "Drafts/signal-002.html"
+    },
+    {
+      "agentPacket": "agent_packet:\n  id: metites-signal-003\n  topic: multi-agent-state-artifact-coordination\n  pipeline_roles: \"Scout (research handoff) -> Archivist (immutable source + wiki lint) -> Editor (dispatch)\"\n  architecture:\n    control_plane: \"SQLite App State (/pipeline/activeTask) holding only stage state and file path pointers with receiptKey idempotency.\"\n    data_plane: \"Immutable disk artifacts written atomically via mkstemp + fsync + os.replace and locked with SHA-256 manifest hashes.\"\n    handoff_barrier: \"Write and validate disk artifacts first, update path pointers second, flip stage state last.\"",
+      "issue": "signal-003",
+      "sha256": "96f722a7540f675161396fb5add0d32291d2897ff6d1312ded8de8ecffd5236f",
+      "source": "Drafts/signal-003.html"
+    }
+  ],
+  "products": [
+    {
+      "name": "anchor-gate",
+      "path": "Drafts/product-candidates/anchor-gate",
+      "sha256": "a155f43aff8dd5ac353653f6ada32f45fb1024271b5388a1af6bad88eb264a13",
+      "spec": "LAUNCH.md",
+      "tests": 1
+    },
+    {
+      "name": "metites-company-template",
+      "path": "Drafts/product-candidates/metites-company-template",
+      "sha256": "6ab0f072096e458c135b63fec42329c3bece1a0544fb3651b6ae9776264ee762",
+      "spec": "LAUNCH.md",
+      "tests": 1
+    },
+    {
+      "name": "recall-ladder",
+      "path": "Drafts/product-candidates/recall-ladder",
+      "sha256": "63a9f580005a9c496f45820627ac9adad122f6de50935e25cb5b7cf6a8a7b68f",
+      "spec": "LAUNCH.md",
+      "tests": 1
+    }
+  ]
+}

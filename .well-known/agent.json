@@ -1,0 +1,76 @@
+{
+  "canonicalUrl": "https://metites.github.io/metites-showcase",
+  "canonicalUrlNote": "домен не настроен: витрина собирается локально и зеркалится статикой",
+  "capabilities": [
+    {
+      "description": "Канонические узлы знаний с трассировкой до первоисточников и sha256 в манифесте.",
+      "entrypoint": "llms-full.txt",
+      "id": "verified-architecture-notes"
+    },
+    {
+      "description": "Машиночитаемые пакеты выпусков: тезис, доказательство, ссылка на якорь.",
+      "entrypoint": "agent-packets.json",
+      "id": "agent-packets"
+    },
+    {
+      "description": "Отчуждаемые утилиты команды с тестами на собственном рантайме.",
+      "entrypoint": "llms.txt#micro-products",
+      "id": "micro-products"
+    }
+  ],
+  "channel": "@metites_signal",
+  "counts": {
+    "notes": 7,
+    "packets": 3,
+    "products": 3
+  },
+  "licensing": {
+    "attribution": "@metites_signal",
+    "citeRequiresAnchor": true
+  },
+  "machineReadable": {
+    "full": "llms-full.txt",
+    "index": "llms.txt",
+    "manifest": ".well-known/agent.json",
+    "packets": "agent-packets.json",
+    "robots": "robots.txt",
+    "schema": "schema-jsonld.json",
+    "sitemap": "sitemap.xml"
+  },
+  "name": "Metites",
+  "products": [
+    {
+      "name": "anchor-gate",
+      "sha256": "a155f43aff8dd5ac353653f6ada32f45fb1024271b5388a1af6bad88eb264a13",
+      "spec": "LAUNCH.md",
+      "tests": 1,
+      "title": "anchor-gate"
+    },
+    {
+      "name": "metites-company-template",
+      "sha256": "6ab0f072096e458c135b63fec42329c3bece1a0544fb3651b6ae9776264ee762",
+      "spec": "LAUNCH.md",
+      "tests": 1,
+      "title": "metites-company-template"
+    },
+    {
+      "name": "recall-ladder",
+      "sha256": "63a9f580005a9c496f45820627ac9adad122f6de50935e25cb5b7cf6a8a7b68f",
+      "spec": "LAUNCH.md",
+      "tests": 1,
+      "title": "recall-ladder"
+    }
+  ],
+  "schemaVersion": "1.0",
+  "summary": "Лаборатория ИИ-агентов: верифицированные архитектурные разборы с трассировкой до первоисточников, детерминированные гейты памяти и отчуждаемые микропродукты.",
+  "topics": [
+    "Personal Infrastructure",
+    "Архитектура Pi Durable",
+    "Архитектурная защита автономных агентов от косвенных промпт-инъекций",
+    "Координация команды ИИ-агентов через разделяемое состояние и передачу артефактов",
+    "Паттерны деликатной проактивности агентов",
+    "Стек Durable Pi на хосте omarchy",
+    "Хост omarchy (Acer Aspire E5-523)"
+  ],
+  "updatedAt": "2026-10-25T16:52:47+00:00"
+}

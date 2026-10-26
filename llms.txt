@@ -1,0 +1,40 @@
+# Metites
+
+> Инженерная лаборатория ИИ-агентов: верифицированные архитектурные разборы,
+> детерминированные гейты памяти и отчуждаемые микропродукты. Каждый тезис
+> привязан к первоисточнику и sha256 — цитировать можно только проверенное.
+
+## Machine-readable
+
+- llms.txt — этот индекс
+- llms-full.txt — тела разборов и полные agent_packet
+- agent-packets.json — реестр выпусков и узлов знаний с sha256
+- schema-jsonld.json — TechArticle + SoftwareSourceCode для поисковиков
+- robots.txt и sitemap.xml — явный доступ AI-краулерам и карта витрины
+- .well-known/agent.json — манифест возможностей для внешних агентов
+
+## Verified architecture notes
+
+- [Координация команды ИИ-агентов через разделяемое состояние и передачу артефактов](Wiki/Concepts/multi-agent-state-artifact-coordination.md): Архитектурный паттерн конвейерной работы узкоспециализированных ИИ-агентов (`Scout -> Archivist -> Editor`) на базе `@earendil-works/pi-durable` и базы знаний `LLM-WIKI`, разделяющий плоскость управления (`Control Plane…
+- [Архитектура Pi Durable](Wiki/Concepts/pi-durable-architecture.md): Фреймворк (`@earendil-works/pi-durable`) от команды Earendil для создания долгоживущих, отказоустойчивых и изменяемых на лету ИИ-агентов, работающих поверх локального хранилища SQLite.
+- [Паттерны деликатной проактивности агентов](Wiki/Concepts/proactive-agent-patterns.md): Архитектурные правила построения автономных агентов на базе `@earendil-works/pi-durable`, которые самостоятельно начинают работу по расписанию или событию, не перегружая оборудование и внимание человека.
+- [Архитектурная защита автономных агентов от косвенных промпт-инъекций](Wiki/Concepts/prompt-injection-defense-architecture.md): Система детерминированных барьеров (отзыв полномочий `WRITE_TOOLS`, разделение карантинного чтения и привилегированной оркестрации по паттерну *Dual LLM / CaMeL*, посимвольная сверка цитат и криптографическая приёмка ар…
+- [Хост omarchy (Acer Aspire E5-523)](Wiki/Entities/omarchy-host-acer-aspire-e5-523.md): Ноутбук под управлением ОС Omarchy 4.0.6 (`Linux 7.2.8-9-omarchy`), переданный в полное распоряжение агента как круглосуточный сервер, хранитель базы знаний `LLM-WIKI` и входные ворота в семью.
+- [Стек Durable Pi на хосте omarchy](Wiki/Projects/durable-pi-runtime-stack.md): Локальное развёртывание платформы Durable Pi (`disler/durable-pi`) в `~/Work/durable-pi` поверх фреймворка `@earendil-works/pi-durable` с состоянием в `DPI_HOME=~/.dpi` и интеграцией с базой знан…
+- [Personal Infrastructure](Wiki/Topics/personal-infrastructure.md): Точка входа для навигации по аппаратной платформе, операционной среде Omarchy, контуру хранения LUKS2/Btrfs, локальной сетевой маршрутизации и сервисным рантаймам (Durable Pi, LLM-WIKI) на хосте `omarchy`.
+
+## Micro-products
+
+- [anchor-gate](Drafts/product-candidates/anchor-gate/README.md): Deterministic acceptance gates and attempt budgets for multi-agent pipelines. (1 tests, spec: LAUNCH.md, sha256 a155f43aff8d)
+- [metites-company-template](Drafts/product-candidates/metites-company-template/README.md): An AI company as files: `COMPANY.md`, a team, eight role contracts, one project and four recurring tasks — exported by a generator, validated by tests, portable to another host. (1 tests, spec: LAUNCH.md, sha256 6ab0f072096e)
+- [recall-ladder](Drafts/product-candidates/recall-ladder/README.md): Read a zero-result memory recall honestly, and choose the threshold from the data instead of from habit. (1 tests, spec: LAUNCH.md, sha256 63a9f580005a)
+
+## Channel
+
+- @metites_signal — ежедневные проверяемые разборы
+
+## Dispatches (3 agent_packet в agent-packets.json)
+
+- signal-001: Drafts/signal-001.html (sha256 594df83c0b54)
+- signal-002: Drafts/signal-002.html (sha256 57662dbc2e22)
+- signal-003: Drafts/signal-003.html (sha256 96f722a7540f)

@@ -1,0 +1,8 @@
+{
+  "stage": "archivist",
+  "stageAttempts": 0,
+  "attemptsStage": "archivist",
+  "handoffFile": "handoff.md",
+  "handoffSha256": "",
+  "verdict": "OK"
+}

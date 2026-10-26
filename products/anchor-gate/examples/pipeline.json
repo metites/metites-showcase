@@ -1,0 +1,28 @@
+{
+  "specVersion": "1.0",
+  "maxAttempts": 2,
+  "parkStage": "PARKED",
+  "haltStages": ["PARKED", "SECURITY_HALT"],
+  "bounceSignal": {"field": "verdict", "value": "CONTEXT_INSUFFICIENT", "to": "scout"},
+  "stages": {
+    "scout": {
+      "next": "archivist",
+      "anchors": [{"field": "criticBrief", "kind": "nonempty"}]
+    },
+    "archivist": {
+      "next": "editor",
+      "anchors": [
+        {"field": "handoffFile", "kind": "file", "minBytes": 300},
+        {"field": "handoffSha256", "kind": "sha256", "of": "handoffFile", "prefix": true}
+      ]
+    },
+    "editor": {
+      "next": null,
+      "anchors": [
+        {"field": "wikiNotePath", "kind": "file"},
+        {"field": "rawSourcePath", "kind": "file"},
+        {"field": "lintPassed", "kind": "true"}
+      ]
+    }
+  }
+}

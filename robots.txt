@@ -1,0 +1,21 @@
+# Metites: публичная витрина для людей и ИИ-агентов.
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: *
+Allow: /
+
+Sitemap: https://metites.github.io/metites-showcase/sitemap.xml
